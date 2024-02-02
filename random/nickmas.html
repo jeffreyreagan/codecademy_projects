@@ -1,0 +1,122 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Nick NVP</title>
+    <meta name="description" content="">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0"/>
+</head>
+<body>
+    <style rel="stylesheet">
+        html {
+            height: 100%;
+        }
+        body {
+            height: 100%;
+            margin: 0;
+        }
+        .scroll-wrapper {
+            height: 100%;
+            overflow: hidden;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .scroll-wrapper iframe {
+            min-height: 100vh;
+            border: none;
+        }
+    </style>
+    <div class="scroll-wrapper">
+        <iframe id="MegaControllerIframe-1669745100975" style="width: 100%;"
+                src="https://join.megaphonetv.com/?m=ihzqp&iswebpoll=true&poll_id=active"></iframe>
+    </div>
+    <script type="text/javascript">!function () {
+        class e {
+            constructor(t, s = null) {
+                this.type = null, this.fieldName = t, this.fieldValue = s, this.originMessageID = `${(new Date).getTime()}_${Math.random()}`, this.systemID = e.SYSTEM_ID
+            }
+
+            toPlainObject() {
+                return JSON.parse(JSON.stringify(this))
+            }
+        }
+
+        e.GET = "GET", e.SET = "SET", e.RESPONSE = "RESPONSE", e.LOCAL_STORAGE_CHECK = "LOCAL_STORAGE_CHECK", e.SYSTEM_ID = "MP_FIRST_PARTY_DATA_BRIDGE";
+
+        class t extends e {
+            constructor(t, s, a = null) {
+                super(t, s), this.status = a, this.type = e.RESPONSE
+            }
+        }
+
+        function s() {
+            try {
+                if ("undefined" == typeof localStorage) return !1;
+                try {
+                    return localStorage.setItem("testkey", "testvalue"), localStorage.removeItem("testkey"), !0
+                } catch (e) {
+                    return !1
+                }
+            } catch (e) {
+                return !1
+            }
+        }
+
+        if (window && window.addEventListener) {
+            const a = document.getElementById("MegaControllerIframe-1669745100975");
+            new class {
+                constructor() {
+                    this.targetOrigin = "*", this.bubblingMessages = new Map, this.beginListeningForMessages()
+                }
+
+                beginListeningForMessages() {
+                    window.addEventListener("message", this.messageListener.bind(this), !1)
+                }
+
+                messageListener(a) {
+                    if (a.data.systemID !== e.SYSTEM_ID) return;
+                    let i = a.data.type, n = a.data.fieldName, r = a.data.fieldValue, g = new t;
+                    if (g.originMessageID = a.data.originMessageID, i === e.GET) g.fieldName = n, s() ? this.handleGet(n, a.source, g) : this.checkForBubble(a.data, a.source, g); else if (i === e.SET) s() ? this.handleSet(n, r) : this.checkForBubble(a.data, a.source, g); else if (i === e.LOCAL_STORAGE_CHECK) s() ? this.handleLocalStorageCheck(a.source, g) : this.checkForBubble(a.data, a.source, g); else if (i === e.RESPONSE) {
+                        const e = this.bubblingMessages.get(a.data.originMessageID);
+                        null != e && (this.bubblingMessages.delete(a.data.originMessageID), e.source.postMessage(a.data, this.targetOrigin))
+                    }
+                }
+
+                handleGet(e, t, s) {
+                    s.fieldValue = localStorage.getItem(e), s.status = 200, t.postMessage(s.toPlainObject(), this.targetOrigin)
+                }
+
+                handleSet(e, t) {
+                    localStorage.setItem(e, t)
+                }
+
+                handleLocalStorageCheck(e, t) {
+                    t.status = 200, e.postMessage(t.toPlainObject(), this.targetOrigin)
+                }
+
+                checkForBubble(e, t, s) {
+                    !function () {
+                        try {
+                            return window.self !== window.top
+                        } catch (e) {
+                            return !0
+                        }
+                    }() ? (s.status = 403, s.fieldValue = null, t.postMessage(s.toPlainObject(), this.targetOrigin)) : this.bubbleMessage(e, t)
+                }
+
+                bubbleMessage(t, s) {
+                    this.bubblingMessages.set(t.originMessageID, {
+                        message: t,
+                        source: s
+                    }), t.type !== e.GET && t.type !== e.LOCAL_STORAGE_CHECK || setTimeout(this.handleBubbledMessageTimeout.bind(this), 4e3, t, s), window.parent.postMessage(t, this.targetOrigin)
+                }
+
+                handleBubbledMessageTimeout(t, s) {
+                    this.bubblingMessages.has(t.originMessageID) && (this.bubblingMessages.delete(t.originMessageID), t.status = 404, t.type = e.RESPONSE, s.postMessage(t, this.targetOrigin))
+                }
+            };
+        }
+    }();</script>
+</body>
+</html>
